@@ -3,7 +3,7 @@
     <el-container>
       <el-aside style="width:180px;">
         <el-header>
-          <!-- <img src="./assets/logo@2x.c322923a.png" width="150" style="background-color: #fff;"> -->
+          <img src="./assets/logo@2x.c322923a.png" width="150" style="background-color: #fff;">
 
         </el-header>
         <el-menu>

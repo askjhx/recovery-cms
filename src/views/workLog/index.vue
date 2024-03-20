@@ -7,16 +7,16 @@
             <el-button size="medium" type="primary" icon="el-icon-search" @click="getList"
                 style="margin-right: 10px;">查询</el-button>
 
-            <el-upload style="display: inline;" :beforeUpload="beforeUpload" :on-change="loadFile"
-                accept=".xlsx,.xls,.csv" :http-request="uploadFile" action="" :show-file-list='false' ref="upload">
-                <el-button size="medium" type="warning" icon="el-icon-upload">点击导入</el-button>
+            <el-upload style="display: inline;" :beforeUpload="beforeUpload" :on-change="loadFile" accept=".xlsx,.xls,.csv"
+                :http-request="uploadFile" action="" :show-file-list='false' ref="upload">
+                <el-button size="medium" type="warning" icon="el-icon-upload" @click="importWork">点击导入</el-button>
             </el-upload>
         </el-row>
 
         <el-row>
             <el-tabs style="height: 200px;" type="card">
                 <el-tab-pane v-for="workLog in workLogs " :label="formattedTime(workLog.date, 'YYYY-MM-DD')">
-                    <el-table :data="workLog.work_details" style="width: 100%;">
+                    <el-table size="small" class="tableHei" :data="workLog.work_details" style="width: 100%;">
                         <el-table-column type="index" label="序号" width="180">
                         </el-table-column>
                         <el-table-column prop="carCode" label="车牌号">
@@ -33,24 +33,33 @@
                             </el-table-column>
                         </el-table-column>
                     </el-table>
-                    <el-table style="width: 100%;">
-
-                    </el-table>
                 </el-tab-pane>
             </el-tabs>
         </el-row>
+        <el-dialog title="导入数据" :visible.sync="dialogTableVisible" :close-on-click-modal="false">
+            <importPage :workLogs="importWorkLogs" style="" />
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" type="success" icon="el-icon-check" @click="save">保存</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
 <script>
 import moment from 'moment';
+import importPage from './import.vue'
 export default {
+    components: {
+        importPage
+    },
     data() {
         return {
             fileList: [],
             workLogs: [],
+            importWorkLogs: [],
+            dialogTableVisible: false,
             fullscreenLoading: false,
-            date: ''
+            date: moment(new Date())
         }
     },
     filters: {
@@ -65,6 +74,40 @@ export default {
 
     },
     methods: {
+        save() {
+            this.$confirm('确定数据无异常，否则会导入失败！', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                if (this.importWorkLogs.length <= 0) {
+                    this.$message({
+                        type: 'error',
+                        message: '当前页面无数据，请先导入!'
+                    });
+                    return
+                }
+                this.fullscreenLoading = true
+                this.$axios.post('api/workLog/save', {
+                    workLogs: this.importWorkLogs
+                }, 180000).then(res => {
+                    this.$message({
+                        type: 'success',
+                        message: '数据导入成功，请在列表中查询。'
+                    });
+                    this.fullscreenLoading = false
+                }).catch(err => {
+                    this.fullscreenLoading = false
+                    this.$message({
+                        type: 'error',
+                        message: '导入失败，请重试!'
+                    });
+                    console.log(err);
+                })
+            }).catch(() => { });
+        },
+        importWork() {
+        },
         getList() {
             this.fullscreenLoading = true
             this.$axios.post('api/workLog/get', {
@@ -73,6 +116,7 @@ export default {
                 this.workLogs = res.data
                 this.fullscreenLoading = false
             }).catch(err => {
+                this.fullscreenLoading = false
                 console.log(err);
             })
         },
@@ -88,7 +132,8 @@ export default {
             this.$axios.post('api/workLog/import', {
                 fileUrl: uploadResult.data.path
             }).then(res => {
-                this.workLogs = res.data
+                this.importWorkLogs = res.data
+                this.dialogTableVisible = true
                 this.fullscreenLoading = false
             }).catch(err => {
                 console.log(err);
@@ -105,6 +150,16 @@ export default {
 }
 </script>
 <style>
+.el-table--border th.el-table__cell, .el-table__fixed-right-patch{
+    padding: 2px;
+}
+.el-table th.el-table__cell>.cell{
+    text-align: center;
+}
+.el-dialog__body {
+    height: 580px;
+}
+
 .el-main {
     line-height: 5px;
 }
