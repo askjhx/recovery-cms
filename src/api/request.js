@@ -84,14 +84,12 @@ export function Get(url, params) {
  *@param{String} url 请求地址
  *@param{Object} params 请求参数
  */
-export function Post(url, params, timeout) {
-  instance.timeout = timeout
+export function Post(url, params, config) {
   return new Promise((resolve, reject) => {
-    instance.post(url, params).then((res) => {
+    instance.post(url, params, config).then((res) => {
       resolve(res.data);
     }).catch((error) => {
-      console.log(error);
-      reject(error);
+      reject(error.data);
     })
   })
 }

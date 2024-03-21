@@ -1,4 +1,4 @@
-let env = 'dev'
+let env = 'prod'
 
 let devConfig = {
     aliOssUpload: 'https://recovery-service.oss-cn-guangzhou.aliyuncs.com/',
@@ -6,7 +6,14 @@ let devConfig = {
 }
 
 let prodConfig = {
-
+    aliOssUpload: 'https://recovery-service.oss-cn-guangzhou.aliyuncs.com/',
+    baseAPI: 'https://cms.jin-quan.tech/recovery/'
 }
 
-export default devConfig
+let config 
+if(env === 'prod')
+    config = prodConfig
+else
+    config = devConfig
+
+export default config

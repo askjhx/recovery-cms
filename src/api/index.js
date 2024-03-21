@@ -4,8 +4,8 @@ export default {
   get:(url, params) =>{
     return Get(url, params)
   },
-  post:(url, params, timeout = 3000) =>{
-    return Post(url, params, timeout)
+  post:(url, params, config) =>{
+    return Post(url, params, config)
   },
   put:(url, params) =>{
     return Put(url, params)
